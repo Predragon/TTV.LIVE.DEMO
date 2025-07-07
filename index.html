@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Third Voice - Live Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2c3e50;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .demo-content {
+            padding: 40px;
+        }
+
+        .scenario-selector {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .scenario-selector h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .scenario-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .scenario-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .scenario-btn.active {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+        }
+
+        .demo-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .input-section, .output-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .input-section h4, .output-section h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .tone-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .tone-aggressive {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .tone-passive-aggressive {
+            background: #ffa726;
+            color: white;
+        }
+
+        .tone-neutral {
+            background: #66bb6a;
+            color: white;
+        }
+
+        .tone-happy {
+            background: #42a5f5;
+            color: white;
+        }
+
+        .rewrite-suggestions {
+            margin-top: 20px;
+        }
+
+        .suggestion {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .suggestion:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .suggestion.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .suggestion-label {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .suggestion-text {
+            font-size: 15px;
+            line-height: 1.4;
+            color: #2c3e50;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .example-messages {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .demo-interface {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .scenario-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .scenario-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .demo-content {
+                padding: 20px;
+            }
+            
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>The Third Voice</h1>
+            <p>AI-Powered Communication Assistant - Live Demo</p>
+        </div>
+
+        <div class="demo-content">
+            <div class="scenario-selector">
+                <h3>Choose a Scenario</h3>
+                <div class="scenario-buttons">
+                    <button class="scenario-btn active" data-scenario="coparenting">Co-Parenting</button>
+                    <button class="scenario-btn" data-scenario="workplace">Workplace Conflict</button>
+                    <button class="scenario-btn" data-scenario="relationship">Relationship</button>
+                    <button class="scenario-btn" data-scenario="custom">Custom Message</button>
+                </div>
+            </div>
+
+            <div class="demo-interface">
+                <div class="input-section">
+                    <h4>Your Original Message</h4>
+                    <textarea class="message-input" id="originalMessage" placeholder="Type your message here..."></textarea>
+                    <div class="tone-indicator" id="toneIndicator">Click "Analyze" to detect tone</div>
+                    <button class="analyze-btn" id="analyzeBtn">Analyze & Rewrite</button>
+                </div>
+
+                <div class="output-section">
+                    <h4>AI-Suggested Rewrites</h4>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing tone and generating suggestions...</p>
+                    </div>
+                    <div class="rewrite-suggestions" id="suggestions"></div>
+                </div>
+            </div>
+
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="conflictReduction">--</div>
+                    <div class="metric-label">Conflict Reduction</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="toneScore">--</div>
+                    <div class="metric-label">Tone Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="clarityScore">--</div>
+                    <div class="metric-label">Clarity Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="empathyScore">--</div>
+                    <div class="metric-label">Empathy Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Example messages data -->
+    <div class="example-messages">
+        <div data-scenario="coparenting" data-message="You're being ridiculous about pickup times again. I'm sick of your constant changes and lack of consideration for my schedule. This is exactly why our relationship failed."></div>
+        <div data-scenario="workplace" data-message="I can't believe you threw me under the bus in that meeting. Your presentation was clearly unprepared and you made me look incompetent in front of the entire team."></div>
+        <div data-scenario="relationship" data-message="Fine, whatever. If you don't want to talk about it, then don't. I guess I'll just figure out everything myself like I always do."></div>
+    </div>
+
+    <script>
+        // Demo data and functionality
+        const scenarios = {
+            coparenting: {
+                example: "You're being ridiculous about pickup times again. I'm sick of your constant changes and lack of consideration for my schedule. This is exactly why our relationship failed.",
+                rewrites: [
+                    {
+                        label: "Collaborative Approach",
+                        text: "I'd like to discuss the pickup schedule to find a solution that works for both of us. Could we set up a consistent routine that accommodates our schedules?"
+                    },
+                    {
+                        label: "Focused & Factual",
+                        text: "I need to clarify the pickup times for this week. Can you confirm what works best for you so we can coordinate effectively?"
+                    },
+                    {
+                        label: "Boundary Setting",
+                        text: "I'd appreciate advance notice for schedule changes when possible. Let's work together to establish pickup times that work for everyone."
+                    }
+                ]
+            },
+            workplace: {
+                example: "I can't believe you threw me under the bus in that meeting. Your presentation was clearly unprepared and you made me look incompetent in front of the entire team.",
+                rewrites: [
+                    {
+                        label: "Professional Feedback",
+                        text: "I'd like to discuss how we can better coordinate our presentations in the future. Can we schedule a brief meeting to align on our approach?"
+                    },
+                    {
+                        label: "Solution-Focused",
+                        text: "I noticed some disconnects in our meeting today. Let's sync up to ensure we're presenting a unified message to the team."
+                    },
+                    {
+                        label: "Constructive Dialogue",
+                        text: "I have some thoughts on how we can improve our collaboration for future presentations. Would you be open to discussing this?"
+                    }
+                ]
+            },
+            relationship: {
+                example: "Fine, whatever. If you don't want to talk about it, then don't. I guess I'll just figure out everything myself like I always do.",
+                rewrites: [
+                    {
+                        label: "Vulnerable Expression",
+                        text: "I'm feeling frustrated because I really want to work through this together. Can we try talking about it when you're ready?"
+                    },
+                    {
+                        label: "Need-Based Communication",
+                        text: "I need to understand your perspective on this. I'm willing to listen when you're comfortable sharing."
+                    },
+                    {
+                        label: "Empathetic Approach",
+                        text: "I sense you might need some space right now. I'm here when you're ready to talk through this together."
+                    }
+                ]
+            }
+        };
+
+        // DOM elements
+        const scenarioButtons = document.querySelectorAll('.scenario-btn');
+        const messageInput = document.getElementById('originalMessage');
+        const toneIndicator = document.getElementById('toneIndicator');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const suggestions = document.getElementById('suggestions');
+        const conflictReduction = document.getElementById('conflictReduction');
+        const toneScore = document.getElementById('toneScore');
+        const clarityScore = document.getElementById('clarityScore');
+        const empathyScore = document.getElementById('empathyScore');
+
+        let currentScenario = 'coparenting';
+        let selectedSuggestion = null;
+
+        // Initialize
+        messageInput.value = scenarios[currentScenario].example;
+        updateToneIndicator('aggressive');
+
+        // Scenario selection
+        scenarioButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                scenarioButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentScenario = btn.dataset.scenario;
+                
+                if (currentScenario !== 'custom') {
+                    messageInput.value = scenarios[currentScenario].example;
+                    updateToneIndicator('aggressive');
+                    clearResults();
+                } else {
+                    messageInput.value = '';
+                    toneIndicator.textContent = 'Click "Analyze" to detect tone';
+                    toneIndicator.className = 'tone-indicator';
+                    clearResults();
+                }
+            });
+        });
+
+        // Message input changes
+        messageInput.addEventListener('input', () => {
+            clearResults();
+            if (messageInput.value.trim()) {
+                const detectedTone = detectTone(messageInput.value);
+                updateToneIndicator(detectedTone);
+            } else {
+                toneIndicator.textContent = 'Click "Analyze" to detect tone';
+                toneIndicator.className = 'tone-indicator';
+            }
+        });
+
+        // Analyze button
+        analyzeBtn.addEventListener('click', () => {
+            if (!messageInput.value.trim()) return;
+            
+            analyzeBtn.disabled = true;
+            loading.classList.add('show');
+            suggestions.innerHTML = '';
+            
+            // Simulate API call
+            setTimeout(() => {
+                generateSuggestions();
+                updateMetrics();
+                loading.classList.remove('show');
+                analyzeBtn.disabled = false;
+            }, 2000);
+        });
+
+        function updateToneIndicator(tone) {
+            const toneLabels = {
+                aggressive: 'Aggressive',
+                'passive-aggressive': 'Passive-Aggressive',
+                neutral: 'Neutral',
+                happy: 'Positive'
+            };
+            
+            toneIndicator.textContent = toneLabels[tone] || 'Neutral';
+            toneIndicator.className = `tone-indicator tone-${tone}`;
+        }
+
+        function detectTone(message) {
+            const aggressive = ['ridiculous', 'sick of', 'failed', 'can\'t believe', 'incompetent'];
+            const passiveAggressive = ['fine', 'whatever', 'I guess', 'like I always do'];
+            const positive = ['thank you', 'appreciate', 'wonderful', 'great'];
+            
+            const lowerMessage = message.toLowerCase();
+            
+            if (aggressive.some(word => lowerMessage.includes(word))) {
+                return 'aggressive';
+            } else if (passiveAggressive.some(word => lowerMessage.includes(word))) {
+                return 'passive-aggressive';
+            } else if (positive.some(word => lowerMessage.includes(word))) {
+                return 'happy';
+            }
+            
+            return 'neutral';
+        }
+
+        function generateSuggestions() {
+            let rewrites;
+            
+            if (currentScenario === 'custom') {
+                // Generate generic rewrites for custom messages
+                rewrites = [
+                    {
+                        label: "Constructive Approach",
+                        text: generateConstructiveRewrite(messageInput.value)
+                    },
+                    {
+                        label: "Empathetic Tone",
+                        text: generateEmpathetic(messageInput.value)
+                    },
+                    {
+                        label: "Solution-Focused",
+                        text: generateSolutionFocused(messageInput.value)
+                    }
+                ];
+            } else {
+                rewrites = scenarios[currentScenario].rewrites;
+            }
+            
+            suggestions.innerHTML = '';
+            
+            rewrites.forEach((rewrite, index) => {
+                const suggestionDiv = document.createElement('div');
+                suggestionDiv.className = 'suggestion';
+                suggestionDiv.innerHTML = `
+                    <div class="suggestion-label">${rewrite.label}</div>
+                    <div class="suggestion-text">${rewrite.text}</div>
+                `;
+                
+                suggestionDiv.addEventListener('click', () => {
+                    document.querySelectorAll('.suggestion').forEach(s => s.classList.remove('selected'));
+                    suggestionDiv.classList.add('selected');
+                    selectedSuggestion = index;
+                });
+                
+                suggestions.appendChild(suggestionDiv);
+            });
+        }
+
+        function generateConstructiveRewrite(message) {
+            // Simple rewrite logic for demo
+            return "I'd like to discuss this situation to find a solution that works for both
